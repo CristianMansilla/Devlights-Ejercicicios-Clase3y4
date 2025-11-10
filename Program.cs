@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 using System.Globalization;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Text;
 
 Console.ForegroundColor = ConsoleColor.Cyan;
 Console.WriteLine("-----------------------------");
@@ -16,6 +17,7 @@ Console.WriteLine("-----------------------------");
 Console.ResetColor();
 
 #region VARIABLES GLOBALES
+Console.OutputEncoding = Encoding.UTF8;
 string? valor;
 char letra;
 int cantidadPalabras;
@@ -696,104 +698,390 @@ while (cantidadNumeros < 1)
 #endregion
 Console.WriteLine();
 Console.WriteLine();
-#region SIMULADOR DE ATENCIÓN EN VENTANILLA
+#region ATENCIÓN EN VENTANILLA
 /*
-10 - Simulador de atención en ventanilla:
-Usar una cola (Queue) para simular la atención de clientes en una ventanilla bancaria.
+10 - Simulador de atención en ventanilla: Usar una cola (Queue) para simular la atención
+de clientes en una ventanilla bancaria.
 a. Encolar nombres de clientes.
 b. Atender (desencolar) uno por uno hasta que no queden.
 c. Mostrar en pantalla quién está siendo atendido y cuántos quedan en la fila.
-Hint: usar Enqueue(), Dequeue() y Count.
+d. Hint: usar Enqueue(), Dequeue() y Count.
 */
 Console.ForegroundColor = ConsoleColor.Yellow;
-Console.WriteLine("10) SIMULADOR DE ATENCIÓN EN VENTANILLA");
+Console.WriteLine("10) ATENCIÓN EN VENTANILLA");
 Console.ResetColor();
 
-Queue<string> colaClientes = new Queue<string>();
+cantidadNumeros = 0;
 string nombreCliente = "";
-char opcion;
-continuar = true;
+string primerCliente = "";
+Queue<string> clientes = new Queue<string>();
 
-Console.WriteLine("Simulador de atención bancaria.");
-
-while (continuar)
+Console.WriteLine("Sistema de atención bancaria.");
+while (cantidadNumeros < 1)
 {
     Console.WriteLine("\nAcción a realizar:");
-    Console.WriteLine("a. Agregar clientes a la cola.");
-    Console.WriteLine("b. Atender un cliente.");
-    Console.WriteLine("c. Mostrar cantidad de clientes en espera.");
+    Console.WriteLine("a. Agregar clientes a la fila.");
+    Console.WriteLine("b. Atender a un cliente (1ro de la fila).");
+    Console.WriteLine("c. Mostrar quién está siendo atendido y cuántos quedan en la fila.");
     Console.WriteLine("d. Salir.");
-    Console.Write("Opción: ");
     valor = Console.ReadLine();
-
-    if (!char.TryParse(valor, out opcion))
+    if (char.TryParse(valor, out letra))
     {
-        Console.WriteLine("Entrada inválida. Ingrese una letra válida (a, b, c o d).");
-        continue;
-    }
-
-    opcion = char.ToLower(opcion);
-
-    switch (opcion)
-    {
-        case 'a':
-            while (true)
+        if (letra == 'a' || letra == 'b' || letra == 'c' || letra == 'd')
+        {
+            switch (letra)
             {
-                Console.Write("\nIngrese el nombre del cliente a encolar: ");
-                nombreCliente = Console.ReadLine();
+                case 'a':
+                    continuar = true;
+                    do
+                    {
+                        while (true)
+                        {
+                            Console.Write("\nIngrese el nombre del cliente: ");
+                            valor = Console.ReadLine();
+                            nombreCliente = valor;
+                            if (!string.IsNullOrWhiteSpace(nombreCliente) && nombreCliente.All(c => char.IsLetter(c) || char.IsWhiteSpace(c)))
+                            {
+                                nombreCliente = nombreCliente.Trim();
+                                break;
+                            }
+                            Console.WriteLine("Nombre inválido. Solo letras y espacios.\n");
+                        }
+                        clientes.Enqueue(nombreCliente);
+                        while (true)
+                        {
+                            Console.Write("\n¿Agregar otro cliente? (S/N): ");
+                            valor = Console.ReadLine();
+                            if (!string.IsNullOrWhiteSpace(valor) && char.TryParse(valor.Trim(), out char eleccion))
+                            {
+                                eleccion = char.ToUpperInvariant(eleccion);
+                                if (eleccion == 'S')
+                                {
+                                    continuar = true;
+                                    break;
+                                }
+                                if (eleccion == 'N')
+                                {
+                                    continuar = false;
+                                    break;
+                                }
+                            }
+                            Console.WriteLine("Entrada inválida. Debe ser S/N o s/n.");
+                        }
+                    } while (continuar);
+                    break;
+                case 'b':
+                    continuar = true;
+                    do
+                    {
+                        if (clientes.Count == 0)
+                        {
+                            Console.WriteLine("No hay clientes en la fila para atender.");
+                            break;
+                        }
+                        primerCliente = clientes.Dequeue();
+                        Console.WriteLine($"Atendiendo a {primerCliente}");
+                        while (true)
+                        {
+                            Console.Write("\n¿Atender otro cliente? (S/N): ");
+                            valor = Console.ReadLine();
+                            if (!string.IsNullOrWhiteSpace(valor) && char.TryParse(valor.Trim(), out char eleccion))
+                            {
+                                eleccion = char.ToUpperInvariant(eleccion);
+                                if (eleccion == 'S')
+                                {
+                                    continuar = true;
+                                    break;
+                                }
+                                if (eleccion == 'N')
+                                {
+                                    continuar = false;
+                                    break;
+                                }
+                            }
+                            Console.WriteLine("Entrada inválida. Debe ser S/N o s/n.");
+                        }
+                    } while (continuar);
+                    break;
+                case 'c':
+                    if(primerCliente != "")
+                    {
+                        Console.WriteLine($"Está siendo atendido {primerCliente}");
+                    }
+                    else
+                    {
+                        Console.WriteLine("No hay clientes siendo atendidos.");
+                    }
 
-                if (!string.IsNullOrWhiteSpace(nombreCliente) &&
-                    nombreCliente.All(c => char.IsLetter(c) || char.IsWhiteSpace(c)))
-                {
-                    colaClientes.Enqueue(nombreCliente.Trim());
-                    Console.WriteLine($"Cliente '{nombreCliente}' agregado a la cola.");
-
-                    Console.Write("¿Desea agregar otro cliente? (S/N): ");
-                    string? respuesta = Console.ReadLine();
-                    if (!string.IsNullOrWhiteSpace(respuesta) &&
-                        (respuesta.Trim().ToUpper() == "N"))
-                        break;
-                }
-                else
-                {
-                    Console.WriteLine("Nombre inválido. Solo letras y espacios.\n");
-                }
+                    if (clientes.Count == 0)
+                    {
+                        Console.WriteLine("No resta atender a ningún cliente.");
+                    }
+                    else if (clientes.Count == 1)
+                    {
+                        Console.WriteLine($"Restan por atender {clientes.Count} cliente.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Restan por atender {clientes.Count} clientes.");
+                    }
+                    break;
+                case 'd':
+                    cantidadNumeros++;
+                    Console.WriteLine("Saliendo del programa.");
+                    break;
             }
-            break;
-
-        case 'b':
-            if (colaClientes.Count > 0)
-            {
-                string clienteAtendido = colaClientes.Dequeue();
-                Console.WriteLine($"\nAtendiendo a: {clienteAtendido}");
-                Console.WriteLine($"Quedan {colaClientes.Count} clientes en la fila.");
-            }
-            else
-            {
-                Console.WriteLine("\nNo hay clientes en la cola para atender.");
-            }
-            break;
-
-        case 'c':
-            Console.WriteLine($"\nClientes en espera: {colaClientes.Count}");
-            if (colaClientes.Count > 0)
-            {
-                Console.WriteLine("Listado de clientes en la cola:");
-                foreach (var cliente in colaClientes)
-                {
-                    Console.WriteLine($"- {cliente}");
-                }
-            }
-            break;
-
-        case 'd':
-            continuar = false;
-            Console.WriteLine("\nSaliendo del simulador de atención.");
-            break;
-
-        default:
+        }
+        else
+        {
             Console.WriteLine("Debe ingresar la letra a, b, c o d.");
-            break;
+            Console.WriteLine();
+        }
+    }
+    else
+    {
+        Console.WriteLine("Entrada inválida. Debes ingresar un caracter.");
+        Console.WriteLine();
+    }
+}
+#endregion
+Console.WriteLine();
+Console.WriteLine();
+#region INVENTARIO CON MÚLTIPLES COLECCIONES
+/*
+11 - Inventario con múltiples colecciones: Diseñar un sistema de inventario básico
+usando distintas colecciones:
+a. Un List<string> con los productos disponibles.
+b. Un Dictionary<string, int> para registrar el stock de cada producto.
+c. Un Stack<string> para llevar el historial de acciones realizadas (agregar,
+quitar, vender).
+d. El programa debe permitir:
+i. Agregar un producto y su cantidad.
+ii. Vender un producto (restando stock).
+iii. Mostrar el inventario actual.
+iv. Mostrar las últimas 3 acciones registradas.
+e. Hint: combina listas, diccionarios y pilas para manipular distintos tipos de
+información.
+*/
+Console.ForegroundColor = ConsoleColor.Yellow;
+Console.WriteLine("11) INVENTARIO CON MÚLTIPLES COLECCIONES");
+Console.ResetColor();
+
+cantidadNumeros = 0;
+string nombreProducto;
+int cantidadProducto = 0;
+int cantidadExistente;
+bool productoEncontrado = false;
+List<string> productos = new List<string>();
+Dictionary<string, int> stockProductos = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+Stack<string> historialAcciones = new Stack<string>();
+
+Console.WriteLine("Sistema de inventario.");
+while (cantidadNumeros < 1)
+{
+    Console.WriteLine("\nAcción a realizar:");
+    Console.WriteLine("a. Agregar un producto.");
+    Console.WriteLine("b. Vender un producto.");
+    Console.WriteLine("c. Mostrar inventario actual.");
+    Console.WriteLine("d. Mostrar últimas 3 acciones registradas.");
+    Console.WriteLine("e. Salir.");
+    valor = Console.ReadLine();
+    if (char.TryParse(valor, out letra))
+    {
+        if (letra == 'a' || letra == 'b' || letra == 'c' || letra == 'd' || letra == 'e')
+        {
+            switch (letra)
+            {
+                case 'a':
+                    historialAcciones.Push("Agregar un producto");
+                    continuar = true;
+                    do
+                    {
+                        while (true)
+                        {
+                            Console.Write("\nIngrese el producto: ");
+                            valor = Console.ReadLine();
+                            nombreProducto = valor;
+                            if (!string.IsNullOrWhiteSpace(nombreProducto) && nombreProducto.All(c => char.IsLetter(c) || char.IsWhiteSpace(c)))
+                            {
+                                nombreProducto = nombreProducto.Trim();
+                                break;
+                            }
+                            Console.WriteLine("Nombre inválido. Solo letras y espacios.\n");
+                        }
+                        while (true)
+                        {
+                            Console.Write($"Cantidad de {nombreProducto}: ");
+                            valor = Console.ReadLine();
+                            if (int.TryParse(valor, out cantidadProducto))
+                            {
+                                if (cantidadProducto > 0) break;
+                            }
+                            Console.WriteLine("Cantidad inválida. Debe ser un número mayor a 0.\n");
+                        }
+                        productos.Add(nombreProducto);
+                        stockProductos.Add(nombreProducto, cantidadProducto);
+                        while (true)
+                        {
+                            Console.Write("\n¿Agregar otro producto? (S/N): ");
+                            valor = Console.ReadLine();
+                            if (!string.IsNullOrWhiteSpace(valor) && char.TryParse(valor.Trim(), out char eleccion))
+                            {
+                                eleccion = char.ToUpperInvariant(eleccion);
+                                if (eleccion == 'S')
+                                {
+                                    continuar = true;
+                                    break;
+                                }
+                                if (eleccion == 'N')
+                                {
+                                    continuar = false;
+                                    break;
+                                }
+                            }
+                            Console.WriteLine("Entrada inválida. Debe ser S/N o s/n.");
+                        }
+                    } while (continuar);
+                    break;
+                case 'b':
+                    cantidadProducto = 0;
+                    historialAcciones.Push("Vender un producto");
+                    if (productos.Count == 0)
+                    {
+                        Console.WriteLine("No hay productos para vender");
+                        break;
+                    }
+                    continuar = true;
+                    while (continuar)
+                    {
+                        if (productos.Count == 0)
+                        {
+                            Console.WriteLine("No quedan más productos para vender.");
+                            break;
+                        }
+                        productoEncontrado = false;
+                        while (true)
+                        {
+                            Console.Write("\nProducto a vender: ");
+                            valor = Console.ReadLine();
+                            nombreProducto = valor;
+                            if (!string.IsNullOrWhiteSpace(nombreProducto) && nombreProducto.All(c => char.IsLetter(c) || char.IsWhiteSpace(c)))
+                            {
+                                nombreProducto = nombreProducto.Trim();
+                                break;
+                            }
+                            Console.WriteLine("Nombre inválido. Solo letras y espacios.\n");
+                        }
+                        if (!stockProductos.TryGetValue(nombreProducto, out cantidadExistente) || cantidadExistente <= 0)
+                        {
+                            Console.WriteLine("No se encontró el producto o no hay stock.");
+                            break;
+                        }
+                        do
+                        {
+                            Console.Write($"Cantidad de {nombreProducto} a vender: ");
+                            valor = Console.ReadLine();
+                            if (int.TryParse(valor, out cantidadProducto) && cantidadProducto <= cantidadExistente)
+                            {
+                                if (cantidadProducto > 0) break;
+                            }
+                            Console.WriteLine($"Cantidad inválida. Debe ser un número mayor a 0 y menor a {cantidadExistente + 1}.\n");
+                        } while (true);
+                        for (int i = productos.Count - 1; i >= 0; i--)
+                        {
+                            if (productos[i].Equals(nombreProducto, StringComparison.OrdinalIgnoreCase))
+                            {
+                                stockProductos[nombreProducto] -= cantidadProducto;
+                                if (stockProductos[nombreProducto] == 0)
+                                {
+                                    productos.RemoveAt(i);
+                                    stockProductos.Remove(nombreProducto);
+                                }
+                                productoEncontrado = true;
+                            }
+                        }
+
+                        if (productoEncontrado == false)
+                        {
+                            Console.WriteLine("No se encontró el producto en la lista de productos existentes.");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Se ha vendido {cantidadProducto} unidades de {nombreProducto}.");
+                        }
+                        while (true)
+                        {
+                            Console.Write("\n¿Vender otro producto? (S/N): ");
+                            valor = Console.ReadLine();
+                            if (!string.IsNullOrWhiteSpace(valor) && char.TryParse(valor.Trim(), out char eleccion))
+                            {
+                                eleccion = char.ToUpperInvariant(eleccion);
+                                if (eleccion == 'S')
+                                {
+                                    continuar = true;
+                                    break;
+                                }
+                                if (eleccion == 'N')
+                                {
+                                    continuar = false;
+                                    break;
+                                }
+                            }
+                            Console.WriteLine("Entrada inválida. Debe ser S/N o s/n.");
+                        }
+                    }
+                    break;
+                case 'c':
+                    historialAcciones.Push("Mostrar inventario actual");
+                    if(productos.Count < 1)
+                    {
+                        Console.WriteLine("No hay productos en stock.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Productos en stock:");
+                        foreach (var producto in stockProductos)
+                        {
+                            if(producto.Value == 1)
+                            {
+                                Console.WriteLine($"🔹{producto.Key} - {producto.Value} unidad");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"🔹{producto.Key} - {producto.Value} unidades");
+                            }
+                            
+                        }
+                    }
+                    break;
+                case 'd':
+                    if (historialAcciones.Count == 0)
+                    {
+                        Console.WriteLine("No hay acciones en el historial.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Últimas acciones:");
+                        foreach (var accion in historialAcciones.TakeLast(3))
+                            Console.WriteLine($"🔸 {accion}");
+                    }                     
+                    break;
+                case 'e':
+                    cantidadNumeros++;
+                    Console.WriteLine("Saliendo del programa.");
+                    break;
+            }
+        }
+        else
+        {
+            Console.WriteLine("Debe ingresar la letra a, b, c, d o e.");
+            Console.WriteLine();
+        }
+    }
+    else
+    {
+        Console.WriteLine("Entrada inválida. Debes ingresar un caracter.");
+        Console.WriteLine();
     }
 }
 #endregion
